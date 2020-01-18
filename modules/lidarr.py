@@ -14,22 +14,22 @@ import htpc
 from htpc.helpers import fix_basepath, get_image, striphttp
 
 
-class Sonarr(object):
+class Lidarr(object):
     def __init__(self):
-        self.logger = logging.getLogger('modules.sonarr')
+        self.logger = logging.getLogger('modules.lidarr')
         htpc.MODULES.append({
-            'name': 'Sonarr',
-            'id': 'sonarr',
-            'test': htpc.WEBDIR + 'sonarr/Version',
+            'name': 'Lidarr',
+            'id': 'lidarr',
+            'test': htpc.WEBDIR + 'lidarr/Version',
             'fields': [
-                {'type': 'bool', 'label': 'Enable', 'name': 'sonarr_enable'},
-                {'type': 'text', 'label': 'Menu name', 'name': 'sonarr_name'},
-                {'type': 'text', 'label': 'IP / Host', 'placeholder': 'localhost', 'name': 'sonarr_host'},
-                {'type': 'text', 'label': 'Port', 'placeholder': '8989', 'name': 'sonarr_port'},
-                {'type': 'text', 'label': 'Basepath', 'placeholder': '/sonarr', 'name': 'sonarr_basepath'},
-                {'type': 'text', 'label': 'API KEY', 'name': 'sonarr_apikey'},
-                {'type': 'bool', 'label': 'Use SSL', 'name': 'sonarr_ssl'},
-                {'type': 'text', 'label': 'Reverse proxy link', 'placeholder': '', 'desc': 'Reverse proxy link, e.g. https://sonarr.domain.com', 'name': 'sonarr_reverse_proxy_link'},
+                {'type': 'bool', 'label': 'Enable', 'name': 'lidarr_enable'},
+                {'type': 'text', 'label': 'Menu name', 'name': 'lidarr_name'},
+                {'type': 'text', 'label': 'IP / Host', 'placeholder': 'localhost', 'name': 'lidarr_host'},
+                {'type': 'text', 'label': 'Port', 'placeholder': '8989', 'name': 'lidarr_port'},
+                {'type': 'text', 'label': 'Basepath', 'placeholder': '/lidarr', 'name': 'lidarr_basepath'},
+                {'type': 'text', 'label': 'API KEY', 'name': 'lidarr_apikey'},
+                {'type': 'bool', 'label': 'Use SSL', 'name': 'lidarr_ssl'},
+                {'type': 'text', 'label': 'Reverse proxy link', 'placeholder': '', 'desc': 'Reverse proxy link, e.g. https://lidarr.domain.com', 'name': 'lidarr_reverse_proxy_link'},
 
             ]
         })
@@ -37,37 +37,37 @@ class Sonarr(object):
     @cherrypy.expose()
     @require()
     def index(self):
-        return htpc.LOOKUP.get_template('sonarr.html').render(scriptname='sonarr', webinterface=self.webinterface(), quality=self.Profile())
+        return htpc.LOOKUP.get_template('lidarr.html').render(scriptname='lidarr', webinterface=self.webinterface(), quality=self.Profile())
 
     def webinterface(self):
-        host = striphttp(htpc.settings.get('sonarr_host', ''))
-        port = str(htpc.settings.get('sonarr_port', ''))
-        sonarr_basepath = htpc.settings.get('sonarr_basepath', '/')
-        ssl = 's' if htpc.settings.get('sonarr_ssl', True) else ''
+        host = striphttp(htpc.settings.get('lidarr_host', ''))
+        port = str(htpc.settings.get('lidarr_port', ''))
+        lidarr_basepath = htpc.settings.get('lidarr_basepath', '/')
+        ssl = 's' if htpc.settings.get('lidarr_ssl', True) else ''
 
         # Makes sure that the basepath is /whatever/
-        sonarr_basepath = fix_basepath(sonarr_basepath)
+        lidarr_basepath = fix_basepath(lidarr_basepath)
 
-        url = 'http%s://%s:%s%s' % (ssl, host, port, sonarr_basepath)
+        url = 'http%s://%s:%s%s' % (ssl, host, port, lidarr_basepath)
 
-        if htpc.settings.get('sonarr_reverse_proxy_link'):
-            url = htpc.settings.get('sonarr_reverse_proxy_link')
+        if htpc.settings.get('lidarr_reverse_proxy_link'):
+            url = htpc.settings.get('lidarr_reverse_proxy_link')
 
         return url
 
     def fetch(self, path, banner=None, type=None, data=None):
         try:
-            host = striphttp(htpc.settings.get('sonarr_host', ''))
-            port = str(htpc.settings.get('sonarr_port', ''))
-            sonarr_basepath = htpc.settings.get('sonarr_basepath', '/')
-            ssl = 's' if htpc.settings.get('sonarr_ssl', True) else ''
+            host = striphttp(htpc.settings.get('lidarr_host', ''))
+            port = str(htpc.settings.get('lidarr_port', ''))
+            lidarr_basepath = htpc.settings.get('lidarr_basepath', '/')
+            ssl = 's' if htpc.settings.get('lidarr_ssl', True) else ''
 
             # Makes sure that the basepath is /whatever/
-            sonarr_basepath = fix_basepath(sonarr_basepath)
+            lidarr_basepath = fix_basepath(lidarr_basepath)
 
-            headers = {'X-Api-Key': htpc.settings.get('sonarr_apikey', '')}
+            headers = {'X-Api-Key': htpc.settings.get('lidarr_apikey', '')}
 
-            url = 'http%s://%s:%s%sapi/%s' % (ssl, host, port, sonarr_basepath, path)
+            url = 'http%s://%s:%s%sapi/%s' % (ssl, host, port, lidarr_basepath, path)
 
             if banner:
                 #  the path includes the basepath automaticly (if fetched from api command 'Series')
@@ -96,16 +96,16 @@ class Sonarr(object):
 
     @cherrypy.expose()
     @require(member_of(htpc.role_admin))
-    def Version(self, sonarr_host, sonarr_port, sonarr_basepath, sonarr_apikey, sonarr_ssl=False, **kwargs):
+    def Version(self, lidarr_host, lidarr_port, lidarr_basepath, lidarr_apikey, lidarr_ssl=False, **kwargs):
         try:
-            ssl = 's' if sonarr_ssl else ''
+            ssl = 's' if lidarr_ssl else ''
 
-            if not sonarr_basepath:
-                sonarr_basepath = fix_basepath(sonarr_basepath)
+            if not lidarr_basepath:
+                lidarr_basepath = fix_basepath(lidarr_basepath)
 
-            headers = {'X-Api-Key': str(sonarr_apikey)}
+            headers = {'X-Api-Key': str(lidarr_apikey)}
 
-            url = 'http%s://%s:%s%sapi/system/status' % (ssl, striphttp(sonarr_host), sonarr_port, sonarr_basepath)
+            url = 'http%s://%s:%s%sapi/system/status' % (ssl, striphttp(lidarr_host), lidarr_port, lidarr_basepath)
 
             result = requests.get(url, headers=headers, verify=False)
             return result.json()
